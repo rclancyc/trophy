@@ -20,7 +20,7 @@ def profiler(data_set):
     s_min = np.min(s, axis=1)
 
     # assumes that data set has infinite values if solver did not solve it
-    delete_unsolved = False
+    delete_unsolved = True
     if delete_unsolved:
         
         get_rid_of_idx = s_min < np.inf
@@ -93,14 +93,11 @@ def slice_and_dice(data_list, field):
 
 
 
-eps = 0.0001
+#eps = 0.0001
 eps = 1e-05
-eps = 1e-06
+#eps = 1e-06
 max_problem_dim = 101
 file_path = '/Users/clancy/repos/trophy/python/data/eps'+str(eps)+'max_vars'+str(max_problem_dim)+'/'
-#file_path = '/Users/clancy/repos/trophy/python/data/eps0.0001max_vars26/'
-#file_path = '/Users/clancy/repos/trophy/python/data/eps0.0001max_vars101/'
-#file_path = '/Users/clancy/repos/trophy/python/data/eps1e-05max_vars101/'
 sin_path = file_path + 'single_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'
 dou_path = file_path + 'double_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'
 dyn_path = file_path + 'dynTR_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'
@@ -121,13 +118,14 @@ for df in db_list:
 db_list = [sin, dou, dyn]
 fields = ['time','feval', 'gradnorm', 'nits', 'fevals', 'sing_evals', 'adjusted_evals']
 
-use_field = ['adjusted_evals', 'nits', 'time', 'gradnorm']
-use_title = ['Adjusted values', 'Number of iterations','Time', 'Gradient norm']
+use_field = ['adjusted_evals', 'nits', 'gradnorm']
+use_title = ['Adjusted calls', 'Number of iterations','Gradient norm']
 
-plt.figure(figsize=(8,6))
+#plt.figure(figsize=(8,6))
+plt.figure(figsize=(12,5))
 
-hfont = {'fontname':'Times', 'fontsize':20}
-afont = {'fontname':'Times', 'fontsize':14}
+hfont = {'fontname':'Times', 'fontsize':26}
+afont = {'fontname':'Times', 'fontsize':18}
 
 ii = 0
 print(eps)
@@ -135,23 +133,25 @@ for field in use_field:
     ii += 1
     arr = slice_and_dice(db_list, field)
     xs, ys = profiler(arr)
-    plt.subplot(2,2,ii)
-    #plt.subplot(2,2,ii)
-    plt.semilogx(xs, ys[:,0], label='Single TR', linestyle='-.')
-    plt.semilogx(xs, ys[:,1], label='Double TR', linestyle='--')
-    plt.semilogx(xs, ys[:,2], label='TROPHY (proposed)', linestyle='-')
+    plt.subplot(1,3,ii)
+    plt.semilogx(xs, ys[:,0], label='Single TR', linestyle='-.', linewidth=2.75)
+    plt.semilogx(xs, ys[:,1], label='Double TR', linestyle='--', linewidth=2.75)
+    plt.semilogx(xs, ys[:,2], label='TROPHY (proposed)', linestyle='-', linewidth=2.75)
     plt.xscale('log', base=2)
     plt.xlim([1, xs[-4]])
     plt.ylim([0,1])
     plt.xticks(**afont)
     plt.yticks(**afont)
-    if ii % 2 == 0:
+    plt.xlabel(r"$\tau$", **afont)
+    if ii == 1:
+        plt.ylabel(r'Profile,    $h_j(\tau)$', **afont)
+    if ii % 3 != 1:
         plt.yticks(color='w', **hfont)
     plt.title(use_title[ii-1], **hfont)
     plt.grid(True)
 
-plt.suptitle('Tolerance ' + str(eps))
-plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=.25, hspace=.35)
+plt.subplots_adjust(left=.07, bottom=None, right=.98, top=None, wspace=.2, hspace=.2)
+plt.subplot(1,3,2)
 plt.legend(loc='lower right')
 plt.show()
 

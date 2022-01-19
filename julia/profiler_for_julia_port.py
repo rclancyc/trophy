@@ -1,3 +1,4 @@
+import enum
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -101,10 +102,10 @@ eps = 1e-05
 max_problem_dim = 101
 max_num_bits = 53
 
-file_path = git_repos + 'trophy/julia/data/'
+file_path = git_repos + '/trophy/julia/data/'
 
 prec_level = ['11', '24', '53', '24_53', '11_24_53', '8_11_17_24_53', '8_13_18_23_28_33_38_43_48_53']
-legends = [   'H',  'S',  'D',  'S,D',   'H,S,D',    '8,11,17,24,53', 'Every 5 bits']
+legends = [   'Half (H)',  'Single (S)',  'Double (D)',  'S,D',   'H,S,D',    '8, 11, 17, 24, 53', 'Every 5 bits']
 
 file_list = list()
 db_list = list()
@@ -125,7 +126,15 @@ for pl in prec_level:
     data_mat = np.asarray(sub_df)
     bits_complexity = data_mat@rel_cost
     bits_complexity[np.logical_not(df['success'])] = np.inf
-    df['adjusted_evals'] = bits_complexity
+    df['adjusted_evals_lin'] = bits_complexity
+    
+    n_bits = np.array([int(i) for i in sub_df.columns])
+    rel_cost = (n_bits/max_num_bits)**2
+
+    data_mat = np.asarray(sub_df)
+    bits_complexity = data_mat@rel_cost
+    bits_complexity[np.logical_not(df['success'])] = np.inf
+    df['adjusted_evals_quad'] = bits_complexity
     db_list.append(df)
 
 
@@ -138,13 +147,15 @@ solver_list = legends
 
 fields = ['time','feval', 'gradnorm', 'nits', 'fevals', 'sing_evals', 'adjusted_evals']
 
-use_field = ['adjusted_evals', 'nits', 'time', 'gradnorm']
-use_title = ['Adjusted values', 'Number of iterations','Time', 'Gradient norm']
+use_field = ['adjusted_evals_lin', 'nits', 'gradnorm']
+use_title = ['Adjusted calls', 'Number of iterations','Gradient norm']
 
-plt.figure(figsize=(8,6))
+plt.figure(figsize=(12,5))
 
-hfont = {'fontname':'Times', 'fontsize':20}
-afont = {'fontname':'Times', 'fontsize':14}
+hfont = {'fontname':'Times', 'fontsize':26}
+afont = {'fontname':'Times', 'fontsize':18}
+ls_list = [':', '-.', '--', ':', '-.', '--','-']
+lw_list = [2.25,1.75,1.75,3.5,2.75,2.75,2.75]
 
 ii = 0
 print(eps)
@@ -152,23 +163,25 @@ for field in use_field:
     ii += 1
     arr = slice_and_dice(db_list, field)
     xs, ys = profiler(arr)
-    plt.subplot(2,2,ii)
-    #plt.subplot(2,2,ii)
-    plt.semilogx(xs, ys[:,0], label='Single TR', linestyle='-.')
-    plt.semilogx(xs, ys[:,1], label='Double TR', linestyle='--')
-    plt.semilogx(xs, ys[:,2], label='TROPHY (proposed)', linestyle='-')
+    plt.subplot(1,3,ii)
+    for k, y in enumerate(ys.T):
+        plt.semilogx(xs, y, label=legends[k], linestyle=ls_list[k], linewidth=lw_list[k])
     plt.xscale('log', base=2)
     plt.xlim([1, xs[-4]])
     plt.ylim([0,1])
     plt.xticks(**afont)
+    plt.xlabel(r"$\tau$", **afont)
     plt.yticks(**afont)
-    if ii % 2 == 0:
+    if ii == 1:
+        plt.ylabel(r'Profile,    $h_j(\tau)$', **afont)
+    if ii % 3 != 1:
         plt.yticks(color='w', **hfont)
     plt.title(use_title[ii-1], **hfont)
     plt.grid(True)
 
-plt.suptitle('Tolerance ' + str(eps))
-plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=.25, hspace=.35)
+#plt.suptitle('Tolerance ' + str(eps))
+plt.subplots_adjust(left=.07, bottom=None, right=.98, top=None, wspace=.2, hspace=.2)
+plt.subplot(1,3,2)
 plt.legend(loc='lower right')
 plt.show()
 
