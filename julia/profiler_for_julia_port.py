@@ -1,7 +1,9 @@
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import copy
+git_repos = os.getenv('GITREPOS')
 
 
 
@@ -93,32 +95,47 @@ def slice_and_dice(data_list, field):
 
 
 
-eps = 0.0001
+#eps = 0.0001
 eps = 1e-05
-eps = 1e-06
+#eps = 1e-06
 max_problem_dim = 101
-file_path = '/Users/clancy/repos/trophy/python/data/eps'+str(eps)+'max_vars'+str(max_problem_dim)+'/'
-#file_path = '/Users/clancy/repos/trophy/python/data/eps0.0001max_vars26/'
-#file_path = '/Users/clancy/repos/trophy/python/data/eps0.0001max_vars101/'
-#file_path = '/Users/clancy/repos/trophy/python/data/eps1e-05max_vars101/'
-sin_path = file_path + 'single_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'
-dou_path = file_path + 'double_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'
-dyn_path = file_path + 'dynTR_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'
+max_num_bits = 53
 
-legends = ['Single TR', 'Double TR', 'TROPHY']
+file_path = git_repos + 'trophy/julia/data/'
 
-sin = pd.read_csv(sin_path)
-dou = pd.read_csv(dou_path)
-dyn = pd.read_csv(dyn_path)
+prec_level = ['11', '24', '53', '24_53', '11_24_53', '8_11_17_24_53', '8_13_18_23_28_33_38_43_48_53']
+legends = [   'H',  'S',  'D',  'S,D',   'H,S,D',    '8,11,17,24,53', 'Every 5 bits']
 
-solver_list = ['Single TR', 'Double TR', 'TROPHY'] #, 'L-BFGS', 'TR-NCG']
+file_list = list()
+db_list = list()
+for pl in prec_level:
+    file_name = file_path + 'julia_prec_' + pl + '.csv'
+    file_list.append(file_name)
 
-db_list = [sin, dou, dyn]
-for df in db_list:
-    # treats single evals as half the cost of double
-    df['adjusted_evals'] = (df['fevals'] - df['single_evals']) + 0.5*df['single_evals']
+    df = pd.read_csv(file_name)
+    colnames = df.columns
+    col_idx = [c.isdigit() for c in colnames]
+    sub_df = df.iloc[:, col_idx]
+    sub_df.columns
 
-db_list = [sin, dou, dyn]
+    # get the relative cost based on number of bits
+    n_bits = np.array([int(i) for i in sub_df.columns])
+    rel_cost = n_bits/max_num_bits
+
+    data_mat = np.asarray(sub_df)
+    bits_complexity = data_mat@rel_cost
+    bits_complexity[np.logical_not(df['success'])] = np.inf
+    df['adjusted_evals'] = bits_complexity
+    db_list.append(df)
+
+
+
+
+solver_list = legends
+
+
+
+
 fields = ['time','feval', 'gradnorm', 'nits', 'fevals', 'sing_evals', 'adjusted_evals']
 
 use_field = ['adjusted_evals', 'nits', 'time', 'gradnorm']

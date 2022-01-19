@@ -19,7 +19,7 @@ sys.path.append(cache_dir)
 def test_all():
 
     # initialize variables
-    eps = 1.0e-5
+    eps = 1.0e-10
     epsTR = 1.0e-6
     maxit = 5000
     max_problem_dim = 101
