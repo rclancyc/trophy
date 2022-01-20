@@ -26,8 +26,6 @@ def test_all():
     max_memory = 15
     singleTR = list()
     doubleTR = list()
-    #lbfgs = list()
-    #trncg = list()
     dynTR = list()
 
     # create new directory if there isn't one
@@ -40,8 +38,7 @@ def test_all():
     sing_file = use_dir + '/single_max'+str(max_problem_dim) + '_eps'+ str(eps) + 'vars.csv'
     doub_file = use_dir + '/double_max'+str(max_problem_dim) + '_eps'+ str(eps) + 'vars.csv'
     dyn_file = use_dir + '/dynTR_max'+str(max_problem_dim) + '_eps'+ str(eps) + 'vars.csv'
-    #bfgs_file = use_dir + '/lbfgs_max'+str(max_problem_dim) + '_eps'+ str(eps) + 'vars.csv'
-    #trncg_file = use_dir + '/trncg_max'+str(max_problem_dim) + '_eps'+ str(eps) + 'vars.csv'
+
 
     # create data fields for write files
     fields = ['problem', 'dimension', 'success', 'time', 'feval', 'gradnorm', 'nits', 'fevals', 'single_evals','message']
@@ -87,10 +84,8 @@ def test_all():
                     mystr = '(' + ret.message[0:25] + ')'
                     print(mystr)
                     if ret.success:
-                        #success = 'converged'
                         success = True
                     else:
-                        #success = 'failed'
                         success = False
                     temp = [prob_str, dim, success, t_elapsed, ret.fun, norm(ret.jac), ret.nit, ret.nfev, ret.precision_counts['single'], ret.message]
                     singleTR.append(temp)
@@ -104,51 +99,14 @@ def test_all():
                     mystr = '(' + ret.message[0:25] + ')'
                     print(mystr)
                     if ret.success:
-                        #success = 'converged'
                         success = True
                     else:
-                        #success = 'failed'
                         success = False
                     temp = [prob_str, dim, success, t_elapsed, ret.fun, norm(ret.jac), ret.nit, ret.nfev, 0, ret.message]
                     doubleTR.append(temp)
 
-                    """
-                    # LBFGS SOLVER
-                    t0 = time.time()
-                    print('Solving LBFGS.', end=' ')
-                    ret = scipy.optimize.minimize(func_bfgs, x0, method="L-BFGS-B", jac=True, tol=10**(-33), bounds=None, options={'ftol': 10**(-33), 'gtol': eps, 'maxcor': max_memory, 'maxiter': maxit})
-                    t_elapsed = time.time() - t0
-                    mystr = '(' + ret.message[0:25] + ')'
-                    print(mystr)
-                    if ret.success:
-                        if 'REL_RED' in ret.message:
-                            success = 'failed'
-                        else:
-                            success = 'converged'
-                    else:
-                        success = 'failed'
-                    temp = [prob_str, success, t_elapsed, ret.fun, norm(ret.jac), ret.nit, ret.nfev, 0, ret.message]
-                    lbfgs.append(temp)
-
-                    # SCIPY TR newton CG SOLVER
-                    t0 = time.time()
-                    print('Solving Trust region CG.', end=' ')
-                    ret = scipy.optimize.minimize(func_bfgs, x0, method='trust-ncg', jac=True, hess=hessian, options={'gtol': eps, 'maxiter': maxit})
-                    t_elapsed = time.time() - t0
-                    mystr = '(' + ret.message[0:50] + ')'
-                    print(mystr)
-                    if ret.success:
-                        if 'REL_RED' in ret.message:
-                            success = 'failed'
-                        else:
-                            success = 'converged'
-                    else:
-                        success = 'failed'
-                    temp = [prob_str, success, t_elapsed, ret.fun, norm(ret.jac), ret.nit, ret.nfev, 0, ret.message]
-                    trncg.append(temp)
-                    """
-
-                    # DYNAMIC PRECISION
+        
+                    # TROPHY
                     t0 = time.time()
                     print('Solving dynamic TR.', end=' ')
                     ret = trophy.DynTR(x0, func_dynamic, {'single': 1, 'double': 2}, gtol=eps, max_iter=maxit, tr_tol=epsTR, verbose=False, max_memory=max_memory, norm_to_use=2)
@@ -156,10 +114,8 @@ def test_all():
                     mystr = '(' + ret.message[0:25] + ')'
                     print(mystr)
                     if ret.success:
-                        #success='converged'
                         success = True
                     else:
-                        #success='failed'
                         success = False
                     temp = [prob_str, dim, success, t_elapsed, ret.fun, norm(ret.jac), ret.nit, ret.nfev, ret.precision_counts['single'], ret.message]
                     dynTR.append(temp)
@@ -168,15 +124,9 @@ def test_all():
                         sing_df = pd.DataFrame(data=singleTR, columns=fields)
                         doub_df = pd.DataFrame(data=doubleTR, columns=fields)
                         dyn_df  = pd.DataFrame(data=dynTR, columns=fields)
-                        #bfgs_df = pd.DataFrame(data=lbfgs, columns=fields)
-                        #trncg_df = pd.DataFrame(data=trncg, columns=fields)
                         sing_df.to_csv(sing_file)
                         doub_df.to_csv(doub_file)
                         dyn_df.to_csv(dyn_file)
-                        #bfgs_df.to_csv(bfgs_file)
-                        #trncg_df.to_csv(trncg_file)
-
-
                 else:
                     print('\n', i+1, '. ' + prob_str + ' problem exceeds maximum number of dimensions')
 
@@ -187,15 +137,10 @@ def test_all():
     sing_df = pd.DataFrame(data=singleTR, columns=fields)
     doub_df = pd.DataFrame(data=doubleTR, columns=fields)
     dyn_df = pd.DataFrame(data=dynTR, columns=fields)
-    #bfgs_df = pd.DataFrame(data=lbfgs, columns=fields)
-    #trncg_df = pd.DataFrame(data=trncg, columns=fields)
 
     sing_df.to_csv(sing_file)
     doub_df.to_csv(doub_file)
     dyn_df.to_csv(dyn_file)
-    #bfgs_df.to_csv(bfgs_file)
-    #trncg_df.to_csv(trncg_file)
-
 
 
 def main():

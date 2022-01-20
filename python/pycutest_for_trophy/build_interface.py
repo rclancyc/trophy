@@ -12,6 +12,7 @@ import subprocess
 from glob import glob
 import warnings
 
+
 from .system_paths import get_cache_path, get_sifdecoder_path
 from .c_interface import itf_c_source
 from .install_scripts import get_setup_script
@@ -20,14 +21,16 @@ from .problem_class import CUTEstProblem
 
 __all__ = ['import_problem', 'clear_cache', 'all_cached_problems']
 
+
 # The cache is treated as its own Python module:
 CACHE_SUBFOLDER = 'pycutest_cache_holder'
 
 
 #precision_global= None
 preducer_path = os.environ['PREDUCER']
-#sys.path.append(os.environ['PREDUCER'])
+sys.path.append(preducer_path)
 
+from preducer import run_preducer
 
 def params_to_string(params):
     # Convert a dictionary of SIF parameters to a sensible string representation (used for folder names)
@@ -234,7 +237,28 @@ def decode_and_compile_problem(problemName, destination=None, sifParams=None, si
         for filename in filelist:
             #cmd = 'python ${' + preducer_path + '}/perducer.py '+ filename
             cmd = preducer_path + '/preducer.py '+ filename
-            os.system(cmd)
+            #os.system(cmd)
+            run_preducer(filename)
+
+
+            cmd = preducer_path + '/preducer.py '+ filename
+            #os.system(cmd)
+            os.system('mv ' + filename[:-2] + "_preduced.f " + filename)
+
+            cmd=['gfortran', '-fPIC', '-c', filename]
+            if not quiet:
+                for s in cmd:
+                    print(s, end=' ')
+                print()
+            if subprocess.call(cmd)!=0:
+                raise RuntimeError("gfortran call failed for "+filename)
+            '''
+            #cmd = 'python ${' + preducer_path + '}/perducer.py '+ filename
+            cmd = preducer_path + '/preducer.py '+ filename
+            #os.system(cmd)
+            run_preducer(filename)
+
+
             cmd = preducer_path + '/preducer.py '+ filename
             os.system(cmd)
             os.system('mv ' + filename[:-2] + "_preduced.f " + filename)
@@ -246,6 +270,7 @@ def decode_and_compile_problem(problemName, destination=None, sifParams=None, si
                 print()
             if subprocess.call(cmd)!=0:
                 raise RuntimeError("gfortran call failed for "+filename)
+            '''
     else:  # otherwise just compile double version
         # Compile FORTRAN files
         for filename in filelist:

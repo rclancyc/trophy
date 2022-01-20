@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import os
 import numpy as np
 import pandas as pd
 import copy
@@ -93,11 +94,10 @@ def slice_and_dice(data_list, field):
 
 
 
-#eps = 0.0001
 eps = 1e-05
-#eps = 1e-06
 max_problem_dim = 101
-file_path = '/Users/clancy/repos/trophy/python/data/eps'+str(eps)+'max_vars'+str(max_problem_dim)+'/'
+use_dir = os.environ['GITREPOS'] + '/trophy/python/data'
+file_path = use_dir + '/eps'+str(eps)+'max_vars'+str(max_problem_dim)+'/'
 sin_path = file_path + 'single_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'
 dou_path = file_path + 'double_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'
 dyn_path = file_path + 'dynTR_max'+str(max_problem_dim)+ '_eps'+ str(eps) + 'vars.csv'

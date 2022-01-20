@@ -8,6 +8,12 @@ home_dir = os.environ['HOME']
 pycutest_cache = os.environ['PYCUTEST_CACHE']
 func_loc = pycutest_cache + '/pycutest_cache_holder/'
 
+if not os.path.exists(func_loc):
+    os.makedirs(func_loc)
+    print('Creating folder at ' + func_loc)
+else:
+    print('Writing to ' + func_loc)
+
 # add the location of pycutest_cache_holder to the path
 sys.path.append(pycutest_cache)
 sys.path.append('./pycutest_for_trophy/')

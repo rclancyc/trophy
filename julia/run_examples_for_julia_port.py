@@ -1,7 +1,7 @@
 import csv
 import os
 import numpy as np
-git_repos = os.getenv('GITREPOS')
+git_repos = os.environ['GITREPOS']
 
 import sys
 sys.path.append(git_repos + '/trophy/python')
@@ -74,7 +74,6 @@ prec_dict = {11:1}                                                     # half
 #prec_dict = {11:1, 24:2, 53:3}                                         # half, single, double
 #prec_dict = {8:1, 11:2, 17:3, 24:4, 53:5}                             # other precision types
 #prec_dict = {8:1, 13:2, 18:3, 23:4, 28:5, 33:6, 38:7, 43:8, 48:9, 53:10}      # every 5 bits 
-#prec_dict = {10:1, 14:2, 15:3}
 
 # construct names to use for the different levels of precision
 tmp = ''
@@ -154,11 +153,9 @@ def run_all():
             # get starting point
             x0 = np.asarray(p_double.x0)
             
-            ti = time.time()
             # call TROPHY using Prani's functions with continuously variable precision
             ret1 = trophy.DynTR(x0, func, prec_dict, gtol=eps, max_iter=maxit, 
                     tr_tol=epsTR, verbose=True, max_memory=max_memory, norm_to_use=2, gamma_dec=0.25)
-            tpr = time.time() - ti
             funvals1.append(ret1.fun)
             gradnorms1.append(norm(ret1.jac))
             success1.append(ret1.success)
@@ -166,8 +163,6 @@ def run_all():
             for i, v in enumerate(list(ret1.precision_counts.values())):
                 preccounter1[i].append(v)
 
-            #time.sleep(5)
-            #df1 = pd.DataFrame(data=funvals1, columns=['funcvals'])
             df1 = pd.DataFrame(data=[prob], columns=['problem'])
             df1['prob_dim'] = prob_dim
             df1['funcvals'] = ret1.fun
