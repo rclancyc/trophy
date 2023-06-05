@@ -1,6 +1,16 @@
 # TROPHY: A dynamic precision trust region solver
 
-TROPHY (**T**rust **R**egion **O**ptimization with **P**recision **H**ierarch**Y**) is, as the name implies, a trust region method that uses differing precision to reduce storage, communication costs, and power consumption by using lower precision when able and increasing precision when necessary. You will find code in this repos validating the algorithms merit and providing numerical results for publication. 
+TROPHY (**T**rust **R**egion **O**ptimization with **P**recision **H**ierarch**Y**) is, as the name implies, a trust region method that uses differing precision to reduce storage, communication costs, and power consumption by using lower precision when able and increasing precision when necessary. You will find code in this repos validating the algorithms merit and providing numerical results for publication. A copy our paper can be found [here](https://arxiv.org/pdf/2202.08387). Please cite 
+```
+@inproceedings{clancy2022trophy,
+  title={TROPHY: Trust Region Optimization Using a Precision Hierarchy},
+  author={Clancy, Richard J and Menickelly, Matt and H{\"u}ckelheim, Jan and Hovland, Paul and Nalluri, Prani and Gjini, Rebecca},
+  booktitle={Computational Science--ICCS 2022: 22nd International Conference, London, UK, June 21--23, 2022, Proceedings, Part I},
+  pages={445--459},
+  year={2022},
+  organization={Springer}
+}
+```
 
 
 
